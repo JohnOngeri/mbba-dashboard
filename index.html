@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MBBA Management Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: navy header band, KPI tile row, 2-col chart grid, decision strip. One question per panel. */
+:root{
+  --bg:#FBFBF8;--panel:#ffffff;--ink:#1f3139;--muted:#5f6f75;--line:#e3e8e9;
+  --navy:#38761D;--blue:#6AA84F;--sky:#93C47D;--green:#38761D;--steel:#4D8499;--pale:#D9EAD3;--amber:#d9901a;--red:#b8352c;--grey:#d5dcde;
+  --display:"Montserrat",system-ui,sans-serif;--body:Cambria,Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12191c;--panel:#1b2529;--ink:#e9eff1;--muted:#9fb0b6;--line:#2c3a3f;
+  --navy:#6AA84F;--blue:#8fc275;--sky:#4f7a3e;--green:#7cc15a;--steel:#6fa6bb;--pale:#23331d;--amber:#eaa53a;--red:#e0605a;--grey:#34444a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12191c;--panel:#1b2529;--ink:#e9eff1;--muted:#9fb0b6;--line:#2c3a3f;
+  --navy:#6AA84F;--blue:#8fc275;--sky:#4f7a3e;--green:#7cc15a;--steel:#6fa6bb;--pale:#23331d;--amber:#eaa53a;--red:#e0605a;--grey:#34444a;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 32px}
+header{background:#38761D;color:#fff;padding:22px 24px;border-radius:0 0 14px 14px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end}
+header .eye{font:700 11px var(--display);letter-spacing:.14em;color:#D9EAD3;text-transform:uppercase}
+header h1{font:800 clamp(22px,3.4vw,32px) var(--display);margin:6px 0 4px}
+header p{margin:0;color:#dde9ee;font-size:13px}
+.asof{font:600 12px var(--display);background:rgba(255,255,255,.12);padding:8px 12px;border-radius:8px}
+.headline{font:700 clamp(16px,2.2vw,20px) var(--display);margin:22px 0 14px;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.tile{background:var(--panel);border-radius:12px;padding:14px 16px;border-top:4px solid var(--c,var(--blue))}
+.tile .l{font:700 10.5px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font:800 30px var(--display);margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.tile .s{font-size:12px;color:var(--muted)}
+.tile .d{font:600 12px var(--display);margin-top:4px}
+.up{color:var(--green)}.dn{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin-top:14px}
+.wide{grid-column:1/-1}
+.panel{background:var(--panel);border-radius:12px;padding:16px 18px;min-width:0}
+.panel h2{font:700 15px var(--display);margin:0 0 2px}
+.panel .sub{font-size:12px;color:var(--muted);margin:0 0 12px}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--bg);border-radius:8px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font:600 12px var(--body);padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg button:focus-visible{outline:2px solid var(--blue)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--muted);font-family:var(--display);font-size:11px}
+svg .val{fill:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--panel);font:600 12px var(--body);padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:9}
+.waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:340px}
+.waffle span{aspect-ratio:1;border-radius:4px;max-width:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.k{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:8px;background:var(--pale);cursor:default}
+.k b{font:700 11px var(--display);color:var(--muted);width:48px;flex:none}
+.k span{font-size:12.5px;flex:1;min-width:0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.donutwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.donutwrap svg{width:150px;flex:none}
+.big{font:800 34px var(--display)}
+.flags{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.flag{border-left:4px solid var(--c);padding:8px 12px;background:var(--pale);border-radius:0 8px 8px 0}
+.flag .n{font:800 22px var(--display)}
+.flag .t{font-size:12px;color:var(--muted)}
+footer{font-size:11.5px;color:var(--muted);margin-top:18px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}}
+body{margin:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="eye">Mzansi Black Business Accelerator</div>
+    <h1>Management Dashboard</h1>
+    <p>Asakheni SA for the Kgodiso Development Fund</p>
+  </div>
+  <div class="asof">Data to 28 September 2026</div>
+</header>
+
+<div class="headline">R1.57m in verified sales. 24 machines trading. Recruitment and profitability need decisions.</div>
+
+<div class="tiles">
+  <div class="tile" style="--c:var(--green)"><div class="l">Sales to date</div><div class="v">R1.57m</div><div class="s">Since Jan 2025, NAYAX verified</div><div class="d up">+R128k in Sep</div></div>
+  <div class="tile" style="--c:var(--red)"><div class="l">Active participants</div><div class="v">32<small style="font-size:15px;color:var(--muted)"> / 50</small></div><div class="s">Full deposit paid</div><div class="d dn">-1 since Aug</div></div>
+  <div class="tile" style="--c:var(--amber)"><div class="l">Machines in place</div><div class="v">24<small style="font-size:15px;color:var(--muted)"> / 50</small></div><div class="s">All trading</div><div class="d" style="color:var(--muted)">No change</div></div>
+  <div class="tile" style="--c:var(--amber)"><div class="l">Waiting for machine</div><div class="v">8</div><div class="s">Paid, not installed</div><div class="d up">-1 since Aug</div></div>
+  <div class="tile" style="--c:var(--red)"><div class="l">Reporting a profit</div><div class="v">53%</div><div class="s">8 of 15 respondents</div><div class="d up">+3 pts vs Aug</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel wide">
+    <div class="row">
+      <div><h2>Monthly sales</h2><p class="sub">Calendar months, rand. Hover a bar for the figure.</p></div>
+      <div class="seg" role="group" aria-label="Sales view">
+        <button id="s26" class="on">2026</button><button id="s21">Since Jan 2025</button><button id="sPM">Per machine</button>
+      </div>
+    </div>
+    <div id="salesChart"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Progress to 50 places</h2><p class="sub">Each square is one participant place</p>
+    <div class="waffle" id="waffle"></div>
+    <div class="legend"><span><i style="background:var(--navy)"></i>Machine in place 24</span><span><i style="background:var(--steel)"></i>Waiting 8</span><span><i style="background:var(--sky)"></i>Paying in instalments 4</span><span><i style="background:var(--grey)"></i>Open 14</span></div>
+  </div>
+
+  <div class="panel">
+    <h2>Participant journey</h2><p class="sub">Since launch. 9 of 45 depositors have exited (20%).</p>
+    <div id="funnel"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Machines vs participants</h2><p class="sub">Month end, Jan to Sep 2026</p>
+    <div id="deploy"></div>
+    <div class="legend"><span><i style="background:var(--navy)"></i>Machine in place</span><span><i style="background:var(--steel)"></i>Waiting for machine</span></div>
+  </div>
+
+  <div class="panel">
+    <h2>Operators reporting a profit</h2><p class="sub">Monthly survey, share of respondents. Target 100%.</p>
+    <div id="profit"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Where the money comes from</h2><p class="sub">Share of sales by site type, 25 Aug to 26 Sep</p>
+    <div class="donutwrap"><div id="donut"></div><div id="donutLeg" class="legend" style="flex-direction:column;gap:6px;margin:0"></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Top 10 machines</h2><p class="sub">Sales, 25 Aug to 26 Sep. Top 2 earn 55% of the total.</p>
+    <div id="top"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Training coverage</h2><p class="sub">Trained participants still active, share of all active</p>
+    <div id="train"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Sales by province</h2><p class="sub">25 Aug to 26 Sep</p>
+    <div id="prov"></div>
+  </div>
+
+  <div class="panel wide">
+    <div class="row"><div><h2>KPI scorecard</h2><p class="sub">14 programme KPIs, status at September 2026. Hover for detail.</p></div>
+      <div class="seg" role="group" aria-label="Filter KPIs"><button class="on" data-f="all">All</button><button data-f="r">Off track 4</button><button data-f="a">At risk 6</button><button data-f="g">On track 3</button></div></div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <div class="panel wide">
+    <h2>For decision</h2><p class="sub">Items that need management action</p>
+    <div class="flags">
+      <div class="flag" style="--c:var(--red)"><div class="n">6 of 6</div><div class="t">Applicants who declined cited the R12,000 deposit. 2 would join with phased payments.</div></div>
+      <div class="flag" style="--c:var(--red)"><div class="n">30%</div><div class="t">Monthly rental (R877) as a share of median machine sales</div></div>
+      <div class="flag" style="--c:var(--amber)"><div class="n">5</div><div class="t">Sites needing service, power or relocation support</div></div>
+      <div class="flag" style="--c:var(--amber)"><div class="n">61%</div><div class="t">Of reported profit comes from two operators</div></div>
+      <div class="flag" style="--c:var(--amber)"><div class="n">R12k</div><div class="t">Deposit held for a removed operator, no refund yet</div></div>
+      <div class="flag" style="--c:var(--red)"><div class="n">0</div><div class="t">Protocol for inactive machines. PEPSICO discount not reaching operators.</div></div>
+    </div>
+  </div>
+</div>
+<footer>Sources: NAYAX sales records, Enterprise Room (participants, deposits, machines), operator surveys (self reported profit), exit survey Jul to Aug 2026. Hatfield Studios sales added from operator account from June.</footer>
+</div>
+<div id="tip"></div>
+
+<script>
+const $=id=>document.getElementById(id), tip=$('tip');
+const M26=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const S26=[52843,106531,167981,165612,171912,144560,108621,151320,127920];
+const S25=[151,1306,6140,5548,9002,16043,22989,32489,57057,75471,104805,41809];
+const PM=[2936,5607,7636,7528,7163,6023,4723,6305,5330];
+const R=v=>v>=1e6?'R'+(v/1e6).toFixed(2)+'m':v>=1000?'R'+Math.round(v/1000)+'k':'R'+v;
+function tipOn(el,t){el.addEventListener('mousemove',e=>{tip.textContent=t;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+12,innerWidth-180)+'px';tip.style.top=(e.clientY-34)+'px'});el.addEventListener('mouseleave',()=>tip.style.opacity=0)}
+const NS='http://www.w3.org/2000/svg';
+function el(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e}
+function txt(p,x,y,s,a={}){const t=el('text',Object.assign({x,y},a),p);t.textContent=s;return t}
+
+function bars(host,labels,vals,{w=760,h=240,colorFn,fmt=R,tipFmt,max,labelEvery=1}={}){
+  host.innerHTML='';const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host);
+  const L=8,B=24,T=20,n=vals.length,bw=(w-L)/n,mx=max||Math.max(...vals)*1.1;
+  [0,.5,1].forEach(f=>el('line',{x1:L,x2:w,y1:T+(h-B-T)*(1-f),y2:T+(h-B-T)*(1-f),stroke:'var(--line)'},s));
+  vals.forEach((v,i)=>{const bh=(h-B-T)*v/mx,x=L+i*bw+bw*.15,y=h-B-bh;
+    const r=el('rect',{x,y,width:bw*.7,height:Math.max(bh,1),rx:3,fill:colorFn?colorFn(i,v):'var(--blue)'},s);
+    tipOn(r,(tipFmt||((l,v)=>l+': '+fmt(v)))(labels[i],v));
+    if(n<=12)txt(s,x+bw*.35,y-5,fmt(v),{'text-anchor':'middle',class:'val'});
+    if(i%labelEvery==0)txt(s,x+bw*.35,h-7,labels[i],{'text-anchor':'middle'});});
+}
+function sales(mode){['s26','s21','sPM'].forEach(b=>$(b).classList.toggle('on',b==={a:'s26',b:'s21',c:'sPM'}[mode]));
+  const h=$('salesChart');
+  if(mode==='a')bars(h,M26,S26,{colorFn:i=>i==8?'var(--navy)':'var(--blue)',tipFmt:(l,v)=>l+' 2026: R'+v.toLocaleString('en-ZA')});
+  if(mode==='b'){const lab=['J','F','M','A','M','J','J','A','S','O','N','D',...M26.map(m=>m[0])];
+    bars(h,lab,[...S25,...S26],{colorFn:i=>i<12?'var(--sky)':'var(--blue)',fmt:v=>'',tipFmt:(l,v)=>'R'+v.toLocaleString('en-ZA')});
+    const s=h.querySelector('svg');txt(s,20,14,'2025: R373k',{class:'val'});txt(s,420,14,'2026 to Sep: R1.20m',{class:'val'});}
+  if(mode==='c')bars(h,M26,PM,{colorFn:()=>'var(--navy)',tipFmt:(l,v)=>l+': R'+v.toLocaleString('en-ZA')+' per machine'});
+}
+$('s26').onclick=()=>sales('a');$('s21').onclick=()=>sales('b');$('sPM').onclick=()=>sales('c');sales('a');
+
+// waffle
+const W=$('waffle');[[24,'--navy','Machine in place'],[8,'--steel','Waiting for a machine'],[4,'--sky','Paying deposit in instalments'],[14,'--grey','Open place']].forEach(([n,c,t])=>{for(let i=0;i<n;i++){const d=document.createElement('span');d.style.background=`var(${c})`;tipOn(d,t);W.appendChild(d)}});
+
+// funnel
+(()=>{const d=[['Paid a deposit',45],['Still in programme',36],['Full deposit paid',32],['Machine in place',24]];
+ const s=el('svg',{viewBox:'0 0 380 190'},$('funnel'));
+ d.forEach(([l,v],i)=>{const y=i*46,w=250*v/45;txt(s,0,y+22,l,{});const r=el('rect',{x:120,y:y+6,width:w,height:26,rx:4,fill:i==3?'var(--navy)':'var(--blue)','fill-opacity':1-i*.12},s);
+ txt(s,126+w,y+24,v,{class:'val'});tipOn(r,l+': '+v+(i?' ('+Math.round(v/d[i-1][1]*100)+'% of previous)':''));});})();
+
+// deploy stacked
+(()=>{const inst=[18,19,22,22,24,24,23,24,24],wait=[13,13,12,13,9,9,11,9,8],w=380,h=200,B=22,T=10;
+ const s=el('svg',{viewBox:`0 0 ${w} ${h}`},$('deploy')),bw=w/9,sc=(h-B-T)/40;
+ [0,20,40].forEach(v=>{el('line',{x1:0,x2:w,y1:h-B-v*sc,y2:h-B-v*sc,stroke:'var(--line)'},s)});
+ M26.forEach((m,i)=>{const x=i*bw+bw*.18,bw2=bw*.64;
+  const a=el('rect',{x,y:h-B-inst[i]*sc,width:bw2,height:inst[i]*sc,fill:'var(--navy)'},s);
+  const b=el('rect',{x,y:h-B-(inst[i]+wait[i])*sc,width:bw2,height:wait[i]*sc,fill:'var(--steel)',rx:2},s);
+  tipOn(a,m+': '+inst[i]+' in place');tipOn(b,m+': '+wait[i]+' waiting');
+  txt(s,x+bw2/2,h-B-(inst[i]+wait[i])*sc-4,Math.round(inst[i]/(inst[i]+wait[i])*100)+'%',{'text-anchor':'middle',class:'val','font-size':10});
+  txt(s,x+bw2/2,h-6,m,{'text-anchor':'middle'});});})();
+
+// profit
+(()=>{const h=$('profit');bars(h,['Jun','Jul','Aug','Sep'],[68,33,50,53],{w:380,h:200,max:100,fmt:v=>v+'%',colorFn:i=>i==3?'var(--navy)':'var(--sky)',
+ tipFmt:(l,v)=>l+': '+v+'% ('+{Jun:'15 of 22',Jul:'4 of 12',Aug:'3 of 6',Sep:'8 of 15'}[l]+')'});
+ const s=h.querySelector('svg');el('line',{x1:8,x2:380,y1:20,y2:20,stroke:'var(--green)','stroke-dasharray':'4 4'},s);txt(s,378,14,'Target 100%',{'text-anchor':'end',fill:'var(--green)'});})();
+
+// donut
+(()=>{const d=[['Student accommodation',60,'var(--navy)'],['Factory / industrial',16,'var(--blue)'],['Corporate office',11,'var(--sky)'],['Tertiary campus',9,'var(--steel)'],['Hospitality',4,'var(--amber)']];
+ const s=el('svg',{viewBox:'0 0 120 120'},$('donut'));let a=0;const C=2*Math.PI*45;
+ d.forEach(([l,v,c])=>{const k=el('circle',{cx:60,cy:60,r:45,fill:'none',stroke:c,'stroke-width':20,'stroke-dasharray':`${C*v/100} ${C}`,'stroke-dashoffset':-C*a/100,transform:'rotate(-90 60 60)'},s);a+=v;tipOn(k,l+': '+v+'%');
+  $('donutLeg').insertAdjacentHTML('beforeend',`<span><i style="background:${c}"></i>${l} <b style="color:var(--ink)">${v}%</b></span>`)});
+ txt(s,60,64,'60%',{'text-anchor':'middle',class:'val','font-size':16});})();
+
+// top machines
+(()=>{const d=[['Hatfield Studios',38285],['Arteria Parktown',32721],['Peak Studios',11420],['Sasko Epping',10727],['Gibela Corporate',7285],['Respublica Hatfield Sq',5865],['Gilbarco Bedfordview',5747],['Sasko Aeroton',5652],['Lyceum College',5591],['Bidvest uMhlanga',3980]];
+ const s=el('svg',{viewBox:'0 0 380 270'},$('top'));d.forEach(([l,v],i)=>{const y=i*26,w=190*v/38285;txt(s,0,y+15,l,{});
+ const r=el('rect',{x:135,y:y+4,width:w,height:16,rx:3,fill:i<2?'var(--navy)':'var(--blue)'},s);txt(s,140+w,y+16,R(v),{class:'val'});tipOn(r,l+': R'+v.toLocaleString('en-ZA'))});})();
+
+// training line
+(()=>{const v=[81.8,81.8,75,75,71.4,71.4,69.4,67.6,66.7],w=380,h=190,L=10,B=22,T=16,mn=50,mx=100;
+ const s=el('svg',{viewBox:`0 0 ${w} ${h}`},$('train')),X=i=>L+i*(w-2*L-20)/8+10,Y=p=>T+(h-B-T)*(1-(p-mn)/(mx-mn));
+ [50,75,100].forEach(p=>{el('line',{x1:0,x2:w,y1:Y(p),y2:Y(p),stroke:'var(--line)'},s);txt(s,0,Y(p)-3,p+'%',{})});
+ el('path',{d:v.map((p,i)=>(i?'L':'M')+X(i)+' '+Y(p)).join(' ')+` L${X(8)} ${h-B} L${X(0)} ${h-B}Z`,fill:'var(--red)','fill-opacity':.1},s);
+ el('path',{d:v.map((p,i)=>(i?'L':'M')+X(i)+' '+Y(p)).join(' '),fill:'none',stroke:'var(--red)','stroke-width':2.5},s);
+ v.forEach((p,i)=>{const c=el('circle',{cx:X(i),cy:Y(p),r:i==8?5:3.5,fill:'var(--red)'},s);tipOn(c,M26[i]+': '+p+'%');txt(s,X(i),h-6,M26[i],{'text-anchor':'middle'})});
+ txt(s,X(8),Y(66.7)-10,'66.7%',{'text-anchor':'middle',class:'val'});})();
+
+// province
+(()=>{const d=[['Gauteng',77.7,'var(--navy)'],['Western Cape',19.6,'var(--blue)'],['KwaZulu-Natal',2.7,'var(--sky)']];
+ const s=el('svg',{viewBox:'0 0 380 120'},$('prov'));let x=0;d.forEach(([l,v,c],i)=>{const w=380*v/100;const r=el('rect',{x,y:10,width:w,height:36,fill:c},s);tipOn(r,l+': '+v+'%');x+=w});
+ d.forEach(([l,v,c],i)=>{el('rect',{x:0,y:62+i*20,width:10,height:10,rx:2,fill:c},s);txt(s,16,71+i*20,l+'  '+v+'%',{class:'val'})});})();
+
+// KPIs
+const K=[['KPI-01','Active participants, full deposit','32 of 50','r'],['KPI-02','Completed training','66.7% vs 100%','r'],['KPI-03','Machines installed','24 of 50','a'],['KPI-04','Waiting for a machine','8, down from 13','a'],['KPI-05','Partner alignment sessions','63 vs 55 target','g'],['KPI-06','Attended full day session','66.7% vs 100%','r'],['KPI-07','Onboarding sessions','5 vs 2 target','g'],['KPI-08','Reporting a profit','53% vs 100%','r'],['KPI-09','Rating training positively','Measured once','c'],['KPI-10','Improved living standards','Final report','a'],['KPI-11','Applying new skills','85.7% at start','a'],['KPI-12','Community recognition','Final report','a'],['KPI-13','Confidence in commercial skills','67 / 38 / 56%','a'],['KPI-14','Entrepreneurial identity','Second machine bought','g']];
+const col={r:'var(--red)',a:'var(--amber)',g:'var(--green)',c:'var(--muted)'},lab={r:'Off track',a:'At risk',g:'On track',c:'Closed'};
+function drawK(f){$('kpis').innerHTML='';K.filter(k=>f=='all'||k[3]==f).forEach(k=>{const d=document.createElement('div');d.className='k';d.innerHTML=`<i class="dot" style="background:${col[k[3]]}"></i><b>${k[0]}</b><span>${k[1]}</span>`;tipOn(d,lab[k[3]]+': '+k[2]);$('kpis').appendChild(d)})}
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));drawK(b.dataset.f)});drawK('all');
+</script>
+
+</body>
+</html>
