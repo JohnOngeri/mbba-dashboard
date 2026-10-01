@@ -4,109 +4,95 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MBBA Management Dashboard</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: green header with area tabs, month bar, one area visible at a time. Landing = overview cards that open each area. */
+/* Layout: replica of the MBBA Dashboard Graphics frames. Navy title bar, white tab bar, month pills,
+   headline, linked KPI strip, stat stack + chart, facts + table, recommendations. Single light theme by design. */
 :root{
-  --bg:#FBFBF8;--panel:#ffffff;--ink:#1f3139;--muted:#5f6f75;--line:#e3e8e9;
-  --deep:#38761D;--mid:#6AA84F;--light:#93C47D;--pale:#D9EAD3;--steel:#4D8499;--amber:#d9901a;--red:#b8352c;--grey:#d5dcde;
-  --display:"Montserrat",system-ui,sans-serif;--body:Cambria,Georgia,"Times New Roman",serif;
+  --navy:#1f2a6b;--green:#3fa535;--red:#c8102e;--amber:#e08a00;--grey:#f3f4f8;--line:#e6e8ef;
+  --ink:#1f2a6b;--text:#2d3557;--muted:#7a809a;--lblue:#9dbbe0;--pblue:#dce6f4;--page:#ffffff;--canvas:#ecedf1;
+  --f:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#12191c;--panel:#1b2529;--ink:#e9eff1;--muted:#9fb0b6;--line:#2c3a3f;
-  --deep:#6AA84F;--mid:#8fc275;--light:#4f7a3e;--pale:#23331d;--steel:#6fa6bb;--amber:#eaa53a;--red:#e0605a;--grey:#34444a;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12191c;--panel:#1b2529;--ink:#e9eff1;--muted:#9fb0b6;--line:#2c3a3f;
-  --deep:#6AA84F;--mid:#8fc275;--light:#4f7a3e;--pale:#23331d;--steel:#6fa6bb;--amber:#eaa53a;--red:#e0605a;--grey:#34444a;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 32px}
-header{background:#38761D;color:#fff;padding:20px 24px 0;border-radius:0 0 14px 14px}
-.htop{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end}
-.eye{font:700 11px var(--display);letter-spacing:.14em;color:#D9EAD3;text-transform:uppercase}
-header h1{font:800 clamp(22px,3.4vw,30px) var(--display);margin:6px 0 4px}
-header p{margin:0;color:#e4efe0;font-size:13px}
-.asof{font:600 12px var(--display);background:rgba(255,255,255,.14);padding:8px 12px;border-radius:8px}
-nav{display:flex;gap:2px;overflow-x:auto;margin-top:16px;scrollbar-width:none}
-nav button{border:0;background:none;color:#e4efe0;font:600 13px var(--display);padding:11px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
-nav button.on{color:#fff;border-bottom-color:#fff}
-nav button:hover{color:#fff}
-button:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
-.months{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 6px;align-items:center}
-.months span{font:700 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:6px}
-.months button{border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 13px var(--display);padding:7px 13px;border-radius:8px;cursor:pointer}
-.months button.on{background:var(--deep);border-color:var(--deep);color:#fff}
-.months.off{opacity:.4;pointer-events:none}
-h2.head{font:700 clamp(17px,2.3vw,22px) var(--display);margin:14px 0 14px;text-wrap:balance;max-width:820px;line-height:1.35}
-.kpitag{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;background:var(--pale);border-radius:10px;padding:10px 14px;margin-bottom:14px;font:600 12.5px var(--display)}
-.kpitag small{font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-size:10.5px}
-.pill{display:inline-flex;align-items:center;gap:6px;font:700 11.5px var(--display);padding:4px 10px;border-radius:20px;color:#fff}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.tile{background:var(--panel);border-radius:12px;padding:14px 16px;border-top:4px solid var(--c,var(--mid))}
-.l{font:700 10.5px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.v{font:800 30px var(--display);margin:6px 0 2px;font-variant-numeric:tabular-nums}
-.v small{font-size:15px;color:var(--muted)}
-.s{font-size:12px;color:var(--muted)}
-.d{font:600 12px var(--display);margin-top:4px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:14px;margin-top:14px}
-.wide{grid-column:1/-1}
-.panel{background:var(--panel);border-radius:12px;padding:16px 18px;min-width:0}
-.panel h3{font:700 15px var(--display);margin:0 0 4px}
-.sub{font-size:12px;color:var(--muted);margin:0 0 12px}
-svg{display:block;width:100%;height:auto;overflow:visible}
-svg text{fill:var(--muted);font-family:var(--display);font-size:11px}
-svg .val{fill:var(--ink);font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+body{background:var(--canvas);color:var(--text);font-family:var(--f);font-size:13px}
+.sheet{max-width:1120px;margin:0 auto;background:var(--page);min-height:100vh}
+.bar{background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 28px}
+.bar b{font-weight:800;font-size:15px}
+.bar span{font-size:11px;color:#dfe3f3}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 20px;scrollbar-width:none}
+nav button{border:0;background:none;font:500 12.5px var(--f);color:var(--muted);padding:13px 12px 11px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--navy);font-weight:700;border-bottom-color:var(--green)}
+nav button:hover{color:var(--navy)}
+button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.inner{padding-inline:28px;padding-block:18px 30px}
+.months{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:26px}
+.months .lab{font:700 10px var(--f);letter-spacing:.1em;color:var(--muted);margin-right:8px}
+.months button{border:1px solid var(--line);background:#fff;color:var(--navy);font:500 12px var(--f);padding:7px 13px;border-radius:20px;cursor:pointer}
+.months button.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700}
+.months.off{opacity:.35;pointer-events:none}
+h1{color:var(--navy);font:700 clamp(19px,2.4vw,24px)/1.3 var(--f);margin:0 0 22px;max-width:760px;text-wrap:balance}
+.kpi{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;background:var(--grey);border-radius:6px;padding:11px 16px;margin-bottom:8px;font-size:12px}
+.kpi .lk{font:700 9.5px var(--f);letter-spacing:.1em;color:var(--muted)}
+.kpi .nm{font-weight:700;color:var(--navy)}
+.kpi .tg{color:var(--muted)}
+.kpi .st{margin-left:auto;font-weight:700;display:flex;align-items:center;gap:6px}
+.kpi .st i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:34px;margin-top:22px}
+.stack{display:grid;gap:22px;align-content:start}
+.big{font:800 40px/1 var(--f);color:var(--green);font-variant-numeric:tabular-nums}
+.big.red{color:var(--red)}
+.bl{font-weight:700;color:var(--navy);font-size:13px;margin-top:6px}
+.bs{font-size:11px;color:var(--muted);margin-top:3px}
+.ct{text-align:center;font:800 13.5px var(--f);letter-spacing:.04em;color:var(--navy);text-transform:uppercase;margin:0 0 10px}
+.note{text-align:center;font-size:10.5px;color:var(--muted);margin-top:6px}
+.legend{display:flex;justify-content:center;flex-wrap:wrap;gap:18px;font-size:11px;color:var(--text);margin-top:8px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--panel);font:600 12px var(--display);padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:9}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:left;cursor:pointer;font-family:var(--body);color:var(--ink);display:flex;flex-direction:column;gap:6px;transition:border-color .15s,transform .15s}
-.card:hover{border-color:var(--mid);transform:translateY(-2px)}
-.card .t{font:700 14px var(--display);display:flex;justify-content:space-between;align-items:center;gap:8px}
-.card .n{font:800 26px var(--display)}
-.card .go{font:600 12px var(--display);color:var(--deep);margin-top:auto}
-.recs{background:var(--pale);border-radius:12px;padding:14px 18px;margin-top:14px}
-.recs h3{font:700 11px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--deep);margin:0 0 8px}
-.recs ul{margin:0;padding-left:18px;display:grid;gap:5px;max-width:820px}
-.facts{display:grid;gap:8px}
-.facts div{border-left:3px solid var(--mid);padding:2px 0 2px 10px;font-size:13px}
+.facts{display:grid;gap:12px;align-content:start}
+.facts div{border-left:3px solid var(--green);padding:3px 0 3px 12px;font-size:12.5px;line-height:1.5}
 table{border-collapse:collapse;width:100%;font-size:12.5px}
-th{background:#6AA84F;color:#fff;font:700 11px var(--display);text-align:left;padding:8px 10px;white-space:nowrap}
-td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-tr:nth-child(even) td{background:var(--pale)}
-.tw{overflow-x:auto}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;flex:none}
-.story{background:#38761D;color:#fff;border-radius:12px;padding:18px}
-.story .l{color:#D9EAD3}
-.story p{font:700 17px var(--display);margin:8px 0;line-height:1.35}
-footer{font-size:11.5px;color:var(--muted);margin-top:18px}
-@media (prefers-reduced-motion:reduce){.card{transition:none}}
+th{font-weight:700;color:var(--navy);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-size:11.5px}
+td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--text);font-variant-numeric:tabular-nums}
+tr.sel td{font-weight:700;color:var(--navy);background:var(--grey)}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--grey)}
+.tw{overflow-x:auto;min-width:0}
+.recs{background:var(--grey);border-radius:8px;padding:16px 20px;margin-top:28px}
+.recs h3{font:800 10.5px var(--f);letter-spacing:.1em;color:var(--green);margin:0 0 10px}
+.recs p{margin:0 0 7px;font-size:12.5px}
+.foot{font-size:11px;font-style:italic;color:var(--muted);margin-top:18px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--f);font-size:11px;fill:var(--muted)}
+svg .v{fill:var(--navy);font-weight:700;font-size:12px}
+svg .s{fill:var(--muted);font-size:9.5px}
+#tip{position:fixed;pointer-events:none;background:var(--navy);color:#fff;font:600 11.5px var(--f);padding:6px 9px;border-radius:5px;opacity:0;transition:opacity .1s;z-index:9}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{background:#eef3fa;border-radius:6px;padding:14px;text-align:left;border:1px solid transparent;cursor:pointer;font-family:var(--f);color:var(--text)}
+.card:hover{border-color:var(--lblue)}
+.card .cl{font:700 10px var(--f);letter-spacing:.06em;color:var(--navy);text-transform:uppercase;display:flex;justify-content:space-between;gap:6px}
+.card .cv{font:800 25px var(--f);color:var(--navy);margin:6px 0 4px}
+.card .cs{font-size:11px;line-height:1.4}
+.card .go{font:700 11px var(--f);color:var(--green);margin-top:8px;display:block}
+.story{border:1.5px solid var(--green);border-radius:6px;padding:14px 16px}
+.story h4,.dep h4{font:800 10px var(--f);letter-spacing:.08em;margin:0 0 6px;color:var(--navy)}
+.dep{border:1.5px solid #3d6fb6;border-radius:6px;padding:14px 16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.dotc{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.footer{background:#3d6fb6;color:#fff;font-size:10.5px;padding:9px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media (max-width:820px){.split{grid-template-columns:1fr!important}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.inner,.bar{padding-inline:16px}.footer{padding-inline:16px}}
 body{margin:0}
 </style>
 </head>
 <body>
 
-<div class="wrap">
-<header>
-  <div class="htop">
-    <div><div class="eye">Mzansi Black Business Accelerator</div><h1>Programme Dashboard</h1><p>Asakheni SA for the Kgodiso Development Fund</p></div>
-    <div class="asof">Jan to Sep 2026, data to 28 Sep</div>
-  </div>
+<div class="sheet">
+  <div class="bar"><b>MBBA Programme Dashboard</b><span>Prepared by Asakheni SA for the Kgodiso Development Fund</span></div>
   <nav id="nav" aria-label="Dashboard areas"></nav>
-</header>
-
-<div class="months" id="months" role="group" aria-label="Choose a month"><span>Month</span></div>
-
-<section id="p-overview"></section>
-<section id="p-recruitment" hidden></section>
-<section id="p-machines" hidden></section>
-<section id="p-revenue" hidden></section>
-<section id="p-profit" hidden></section>
-<section id="p-training" hidden></section>
-<section id="p-kpi" hidden></section>
-<section id="p-outcomes" hidden></section>
-
-<footer>Sources: NAYAX sales records, Enterprise Room (participants, deposits, machines), monthly operator profitability survey, exit survey Jul to Aug 2026. Hatfield Studios sales added from her operator account from June. September figures run to 28 Sep.</footer>
+  <div class="inner">
+    <div class="months" id="months" role="group" aria-label="Choose a month"><span class="lab">MONTH, 2026</span></div>
+    <main id="page"></main>
+  </div>
+  <div class="footer"><span>Prepared by Asakheni SA for the Kgodiso Development Fund</span><span>Data to 28 September 2026. Sources: Enterprise Room, NAYAX sales records, operator surveys</span></div>
 </div>
 <div id="tip"></div>
 
@@ -115,188 +101,149 @@ const $=id=>document.getElementById(id),tip=$('tip');
 const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
 const MF=['January','February','March','April','May','June','July','August','September'];
 const D={
- act:[31,32,34,35,33,33,34,33,32], part:[2,1,2,1,2,2,2,4,4],
- joined:[0,1,2,1,0,0,1,0,0], left:[0,0,0,0,2,0,0,1,1],
- mac:[18,19,22,22,24,24,23,24,24], wait:[13,13,12,13,9,9,11,9,8],
+ full:[31,32,34,35,33,33,34,33,31], inst:[2,1,2,1,2,2,2,4,4], joined:[0,1,2,1,0,0,1,0,0], left:[0,0,0,0,2,0,0,1,2],
+ mac:[18,19,22,22,24,24,23,24,24], wait:[13,13,12,13,9,9,11,9,7], minst:[2,1,3,0,3,0,0,1,1], mrem:[0,0,0,0,1,0,1,0,1],
  sales:[52843,106531,167981,165612,171912,144560,108621,151320,127920],
- pm:[2936,5607,7636,7528,7163,6023,4723,6305,5330],
  cum:[425652,532183,700164,865776,1037687,1182247,1290868,1442188,1570108],
- trained:[27,27,27,27,25,25,25,25,24],
- cover:[81.8,81.8,75,75,71.4,71.4,69.4,67.6,66.7],
+ cover:[81.8,81.8,75,75,71.4,71.4,69.4,67.6,68.6], trained:[27,27,27,27,25,25,25,25,24],
  meet:[55,56,57,58,59,60,61,62,63], onb:[3,3,3,3,4,4,4,5,5],
- prof:{5:[15,22],6:[4,12],7:[3,6],8:[8,15]}
+ prof:{5:[22,15,'R410',24],6:[12,4,'-R382',23],7:[6,3,'-R296',24],8:[16,8,'R168',24]}
 };
-const C={g:'var(--deep)',a:'var(--amber)',r:'var(--red)',c:'var(--muted)'},CL={g:'On track',a:'At risk',r:'Off track',c:'Closed'};
-const R=v=>v>=1e6?'R'+(v/1e6).toFixed(2)+'m':v>=1000?'R'+Math.round(v/1000)+'k':'R'+v;
-const RF=v=>'R'+v.toLocaleString('en-ZA');
-const pct=(a,b)=>Math.round(a/b*100);
-function tipOn(e,t){e.addEventListener('mousemove',ev=>{tip.textContent=t;tip.style.opacity=1;tip.style.left=Math.min(ev.clientX+12,innerWidth-200)+'px';tip.style.top=(ev.clientY-36)+'px'});e.addEventListener('mouseleave',()=>tip.style.opacity=0)}
+const ST={on:['On track','var(--green)'],risk:['At risk','var(--amber)'],off:['Off track','var(--red)'],closed:['Closed','var(--muted)']};
+const RF=v=>(v<0?'-':'')+'R'+Math.abs(v).toLocaleString('en-ZA');
+const Rk=v=>v>=1e6?'R'+(v/1e6).toFixed(2)+'m':'R'+Math.round(v/1000)+'k';
 const NS='http://www.w3.org/2000/svg';
 function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e}
 function tx(p,x,y,s,a={}){const t=el('text',Object.assign({x,y},a),p);t.textContent=s;return t}
-const pill=k=>`<span class="pill" style="background:${C[k]}">${CL[k]}</span>`;
-const tile=(l,v,s,c='var(--mid)',d='',dc='var(--muted)')=>`<div class="tile" style="--c:${c}"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}${d?`<div class="d" style="color:${dc}">${d}</div>`:''}</div>`;
-const tag=(k,name,target,val,st)=>`<div class="kpitag"><small>Linked KPI</small><span>${k} ${name}</span><span style="color:var(--muted)">Target ${target}</span><span>${val}</span>${pill(st)}</div>`;
-const recs=a=>`<div class="recs"><h3>What we recommend</h3><ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
-function chg(cur,prev,goodUp,fmt=v=>v){if(prev==null)return['First month','var(--muted)'];const d=cur-prev;if(!d)return['No change','var(--muted)'];return[(d>0?'+':'-')+fmt(Math.abs(d))+' vs last month',(d>0)==goodUp?'var(--deep)':'var(--red)']}
+function tipOn(e,t){e.addEventListener('mousemove',ev=>{tip.textContent=t;tip.style.opacity=1;tip.style.left=Math.min(ev.clientX+12,innerWidth-220)+'px';tip.style.top=(ev.clientY-36)+'px'});e.addEventListener('mouseleave',()=>tip.style.opacity=0)}
+const kpi=(code,name,target,sep,st)=>`<div class="kpi"><span class="lk">LINKED KPI</span><span class="nm">${code} ${name}</span><span class="tg">Target: ${target}</span><span>September 2026: <b>${sep}</b></span><span class="st" style="color:${ST[st][1]}"><i style="background:${ST[st][1]}"></i>${ST[st][0]}</span></div>`;
+const stat=(v,l,s,cls='')=>`<div><div class="big ${cls}">${v}</div><div class="bl">${l}</div><div class="bs">${s}</div></div>`;
+const facts=a=>`<div class="facts">${a.map(x=>`<div>${x}</div>`).join('')}</div>`;
+const recs=a=>`<div class="recs"><h3>WHAT WE RECOMMEND</h3>${a.map(x=>`<p>${x}</p>`).join('')}</div>`;
+function table(head,rows,{selIdx=null,clickIdx}={}){return `<div class="tw"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr class="${i===selIdx?'sel':''} ${clickIdx?'click':''}" ${clickIdx?`data-m="${clickIdx(i)}"`:''}>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function wireRows(){document.querySelectorAll('tr[data-m]').forEach(r=>r.onclick=()=>setM(+r.dataset.m))}
+const op=(i,m)=>m==null||i===m?1:.3;
 
-/* chart helpers: m is the selected month (null = all months) */
-function bars(host,vals,{m=null,w=760,h=220,fmt=R,tipf,max,labels=M,base='var(--light)',hi='var(--deep)'}={}){
- const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host),B=24,T=24,n=labels.length,bw=w/n,mx=max||Math.max(...vals.filter(v=>v!=null))*1.12;
+/* charts */
+function vbars(host,labels,vals,{m=null,idx=i=>i,color='var(--navy)',sub,fmt=v=>v,w=640,h=250,max,tipf}={}){
+ const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host),B=26,T=40,n=labels.length,bw=w/n,mx=max||Math.max(...vals)*1.08;
  el('line',{x1:0,x2:w,y1:h-B,y2:h-B,stroke:'var(--line)'},s);
- labels.forEach((lb,i)=>{const v=vals[i],x=i*bw+bw*.17,bw2=bw*.66;
-  if(v!=null){const bh=(h-B-T)*v/mx,y=h-B-bh;const on=m==null?i==n-1:i==m;
-   const r=el('rect',{x,y,width:bw2,height:Math.max(bh,1),rx:3,fill:on?hi:base,style:'cursor:pointer'},s);r.onclick=()=>setM(i);tipOn(r,(tipf||((l,v)=>l+': '+fmt(v)))(MF[i]||lb,v,i));
-   tx(s,x+bw2/2,y-6,fmt(v),{'text-anchor':'middle',class:'val'})}
-  else tx(s,x+bw2/2,h-B-6,'n/a',{'text-anchor':'middle','font-size':9});
-  tx(s,x+bw2/2,h-7,lb,{'text-anchor':'middle'})});return s}
-function stack(host,a,b,{m=null,w=760,h=220,max=40,la,lb}={}){
- const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host),B=24,T=22,bw=w/9,sc=(h-B-T)/max;
- el('line',{x1:0,x2:w,y1:h-B,y2:h-B,stroke:'var(--line)'},s);
- M.forEach((mm,i)=>{const x=i*bw+bw*.2,b2=bw*.6,o=m==null||i==m?1:.35;
-  const r1=el('rect',{x,y:h-B-a[i]*sc,width:b2,height:a[i]*sc,fill:'var(--deep)','fill-opacity':o,style:'cursor:pointer'},s);
-  const r2=el('rect',{x,y:h-B-(a[i]+b[i])*sc,width:b2,height:b[i]*sc,fill:'var(--steel)','fill-opacity':o,style:'cursor:pointer'},s);
-  r1.onclick=r2.onclick=()=>setM(i);tipOn(r1,MF[i]+': '+a[i]+' '+la);tipOn(r2,MF[i]+': '+b[i]+' '+lb);
-  tx(s,x+b2/2,h-B-(a[i]+b[i])*sc-6,a[i]+b[i],{'text-anchor':'middle',class:'val'});tx(s,x+b2/2,h-7,mm,{'text-anchor':'middle'})});}
-function line(host,vals,{m=null,w=760,h=200,mn=0,mx=100,fmt=v=>v+'%',col='var(--deep)',target}={}){
- const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host),L=38,Rr=20,B=24,T=20,X=i=>L+i*(w-L-Rr)/8,Y=v=>T+(h-B-T)*(1-(v-mn)/(mx-mn));
- [mn,(mn+mx)/2,mx].forEach(v=>{el('line',{x1:L,x2:w,y1:Y(v),y2:Y(v),stroke:'var(--line)'},s);tx(s,0,Y(v)+4,fmt(v))});
- if(target!=null){el('line',{x1:L,x2:w,y1:Y(target),y2:Y(target),stroke:'var(--amber)','stroke-dasharray':'5 4'},s);tx(s,w,Y(target)-5,'Target '+fmt(target),{'text-anchor':'end',style:'fill:var(--amber)'})}
- const d=vals.map((v,i)=>(i?'L':'M')+X(i)+' '+Y(v)).join(' ');
- el('path',{d:d+` L${X(8)} ${Y(mn)} L${X(0)} ${Y(mn)}Z`,fill:col,'fill-opacity':.1},s);
- el('path',{d,fill:'none',stroke:col,'stroke-width':2.5},s);
- vals.forEach((v,i)=>{const on=m==null?i==8:i==m;const c=el('circle',{cx:X(i),cy:Y(v),r:on?6:4,fill:col,style:'cursor:pointer'},s);c.onclick=()=>setM(i);tipOn(c,MF[i]+': '+fmt(v));
-  if(on)tx(s,X(i),Y(v)-12,fmt(v),{'text-anchor':'middle',class:'val'});tx(s,X(i),h-7,M[i],{'text-anchor':'middle'})});}
-function hbars(host,rows,{w=380,fmt=v=>v+'%',lw=150,max}={}){const mx=max||Math.max(...rows.map(r=>r[1]));
- const s=el('svg',{viewBox:`0 0 ${w} ${rows.length*30}`},host);
- rows.forEach(([l,v,c],i)=>{const y=i*30,bw=(w-lw-60)*v/mx;tx(s,0,y+17,l);const r=el('rect',{x:lw,y:y+5,width:Math.max(bw,2),height:18,rx:3,fill:c||'var(--mid)'},s);tipOn(r,l+': '+fmt(v));tx(s,lw+Math.max(bw,2)+6,y+18,fmt(v),{class:'val'})})}
+ labels.forEach((lb,i)=>{const v=vals[i],x=i*bw+bw*.22,b=bw*.56,bh=(h-B-T)*v/mx,y=h-B-bh,k=idx(i);
+  const r=el('rect',{x,y,width:b,height:bh,fill:color,'fill-opacity':op(k,m),style:'cursor:pointer'},s);r.onclick=()=>setM(k);tipOn(r,tipf?tipf(i):lb+': '+fmt(v));
+  tx(s,x+b/2,y-(sub?22:8),fmt(v),{'text-anchor':'middle',class:'v','font-size':14});
+  if(sub)tx(s,x+b/2,y-8,sub[i],{'text-anchor':'middle',class:'s'});
+  tx(s,x+b/2,h-8,lb,{'text-anchor':'middle',style:'fill:var(--navy);font-weight:700;font-size:10.5px'})});}
+function lines(host,series,{m=null,w=640,h=240,mx=30,ticks=[0,10,20,30]}={}){
+ const s=el('svg',{viewBox:`0 0 ${w} ${h}`},host),L=34,Rr=14,B=24,T=16,X=i=>L+i*(w-L-Rr)/8,Y=v=>T+(h-B-T)*(1-v/mx);
+ ticks.forEach(t=>{el('line',{x1:L,x2:w,y1:Y(t),y2:Y(t),stroke:'var(--line)'},s);tx(s,L-8,Y(t)+4,t,{'text-anchor':'end','font-size':9.5})});
+ M.forEach((mm,i)=>tx(s,X(i),h-6,mm,{'text-anchor':'middle','font-size':10}));
+ series.forEach(([vals,col,below,name])=>{el('path',{d:vals.map((v,i)=>(i?'L':'M')+X(i)+' '+Y(v)).join(' '),fill:'none',stroke:col,'stroke-width':2.2},s);
+  vals.forEach((v,i)=>{const c=el('circle',{cx:X(i),cy:Y(v),r:i===m?6:4.5,fill:'#fff',stroke:col,'stroke-width':2.2,style:'cursor:pointer'},s);c.onclick=()=>setM(i);tipOn(c,MF[i]+': '+v+' '+name);
+   tx(s,X(i),below?Y(v)+17:Y(v)-9,v,{'text-anchor':'middle',style:`fill:${col};font-weight:700;font-size:${i===m?12:10}px`})})});}
 
 /* pages */
 const P={};
-P.overview=m=>{const i=m??8,p=i?i-1:null;const sc=chg(D.sales[i],p==null?null:D.sales[p],true,R),ac=chg(D.act[i],p==null?null:D.act[p],true),mc=chg(D.mac[i],p==null?null:D.mac[p],true),wc=chg(D.wait[i],p==null?null:D.wait[p],false);
- const pf=D.prof[i];
- const areas=[
-  ['recruitment','Recruitment','r',`${D.act[i]} of 50`,'places filled with a full deposit'],
-  ['machines','Machine placement','a',`${D.mac[i]} of 50`,`machines in place, ${D.wait[i]} waiting`],
-  ['revenue','Revenue','g',R(D.sales[i]),`sales in ${MF[i]}`],
-  ['profit','Profitability','r',pf?pct(pf[0],pf[1])+'%':'n/a',pf?`of respondents in profit (${pf[0]} of ${pf[1]})`:'survey started in June'],
-  ['training','Training','r',D.cover[i]+'%','of active participants trained'],
-  ['kpi','KPI scorecard','a','3 / 6 / 4','on track, at risk, off track'],
-  ['outcomes','Outcomes','a','1','operator paid off and bought a second machine']];
- const h=$('p-overview');h.innerHTML=`<h2 class="head">${MF[i]} 2026 at a glance. Every machine in place is trading. Recruitment and profitability need decisions.</h2>
- <div class="tiles">${tile('Sales in month',R(D.sales[i]),'','var(--mid)',sc[0],sc[1])}${tile('Sales to date',R(D.cum[i]),'Since Jan 2025','var(--deep)')}${tile('Active participants',D.act[i]+'<small> / 50</small>','','var(--red)',ac[0],ac[1])}${tile('Machines in place',D.mac[i]+'<small> / 50</small>','','var(--amber)',mc[0],mc[1])}${tile('Waiting for a machine',D.wait[i],'','var(--amber)',wc[0],wc[1])}</div>
- <div class="cards">${areas.map(a=>`<button class="card" data-go="${a[0]}"><span class="t">${a[1]}<i class="dot" style="background:${C[a[2]]};margin:0" title="${CL[a[2]]}"></i></span><span class="n">${a[3]}</span><span class="s">${a[4]}</span><span class="go">Open ${a[1].toLowerCase()} →</span></button>`).join('')}</div>
- <div class="grid"><div class="panel wide"><h3>Monthly sales, 2026</h3><p class="sub">Rand, NAYAX verified. Click a bar to change the month.</p><div id="ov-s"></div></div></div>`;
- bars($('ov-s'),D.sales,{m:i,tipf:(l,v)=>l+': '+RF(v)});
- h.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));};
+P.recruitment={months:true,r:m=>{const i=m??8;
+ return `<h1>${D.full[i]} of the 50 places are filled with a full deposit. The deposit is the main barrier to growth.</h1>
+ ${kpi('KPI-01','Active participants with a full deposit','50','31','off')}
+ <div class="split"><div class="stack">${stat(D.full[i]+' of 50','Active participants with a full deposit',`${MF[i]} 2026. ${D.inst[i]} more paying in instalments`)}${stat('45','People who have paid a deposit','Since launch in 2024')}${stat('10 of 45','Withdrew after paying a deposit','22% since launch')}</div>
+ <div><p class="ct">Who joined and who left, month by month</p><div id="c1"></div><p class="note">Grey figures above each month: active participants with a full deposit at month end.</p><div class="legend"><span><i style="background:var(--green)"></i>Completed a full deposit</span><span><i style="background:var(--red)"></i>Left the programme</span></div></div></div>
+ <div class="split">${facts(['Full-deposit participants peaked at 35 in April and ended September at 31.','5 new full deposits in 2026, against 5 exits. Growth has stalled.','Instalment payers doubled from 2 to 4, showing demand among applicants who cannot pay at once.','Every exit-survey respondent cited the R12,000 deposit. None cited communication or understanding of the programme.'])}
+ ${table(['Month','Full deposit','Instalments','Joined','Left'],MF.map((x,k)=>[x,D.full[k],D.inst[k],D.joined[k],D.left[k]]),{selIdx:m,clickIdx:k=>k})}</div>
+ ${recs(['Offer a phased deposit plan that runs longer than four months, settled by installation.','Run a planned intake to fill the 15 open places, with webinars at the points where applicants decide.','Track instalment payers monthly and support them to completion.','Adopt a 30-day inactivity trigger so operators get support before removal.'])}`},
+ draw:m=>{const w=640,h=250,s=el('svg',{viewBox:`0 0 ${w} ${h}`},$('c1')),bw=w/9,mid=118,sc=28;
+  el('line',{x1:0,x2:w,y1:mid,y2:mid,stroke:'#9aa0b8'},s);
+  M.forEach((mm,k)=>{const x=k*bw+bw*.22,b=bw*.56;
+   tx(s,x+b/2,14,D.full[k],{'text-anchor':'middle',style:`fill:var(--muted);font-weight:700;font-size:10px`});
+   if(D.joined[k]){const r=el('rect',{x,y:mid-D.joined[k]*sc,width:b,height:D.joined[k]*sc,fill:'var(--green)','fill-opacity':op(k,m),style:'cursor:pointer'},s);r.onclick=()=>setM(k);tipOn(r,MF[k]+': '+D.joined[k]+' completed a full deposit');tx(s,x+b/2,mid-D.joined[k]*sc-6,'+'+D.joined[k],{'text-anchor':'middle',style:'fill:var(--green);font-weight:700'})}
+   if(D.left[k]){const r=el('rect',{x,y:mid,width:b,height:D.left[k]*sc,fill:'var(--red)','fill-opacity':op(k,m),style:'cursor:pointer'},s);r.onclick=()=>setM(k);tipOn(r,MF[k]+': '+D.left[k]+' left');tx(s,x+b/2,mid+D.left[k]*sc+14,'-'+D.left[k],{'text-anchor':'middle',style:'fill:var(--red);font-weight:700'})}
+   tx(s,x+b/2,h-6,mm,{'text-anchor':'middle',style:'fill:var(--navy);font-weight:700;font-size:10.5px'})})}};
 
-P.recruitment=m=>{const i=m??8;const h=$('p-recruitment');
- h.innerHTML=`<h2 class="head">${D.act[i]} of the 50 places are filled with a full deposit. The R12,000 deposit is the main barrier to growth.</h2>
- ${tag('KPI-01','Active participants with a full deposit','50',`${MF[i]}: ${D.act[i]}`,'r')}
- <div class="tiles">${tile('Full deposit',D.act[i]+'<small> / 50</small>',`${pct(D.act[i],50)}% of target`,'var(--red)')}${tile('Paying in instalments',D.part[i],'Deposit started, below R12,000','var(--amber)')}${tile('Paid any deposit',45,'Since launch','var(--mid)')}${tile('Exited after a deposit','9 of 45','20% since launch','var(--red)')}</div>
- <div class="grid">
-  <div class="panel wide"><h3>Who joined and who left, month by month</h3><p class="sub">Completed a full deposit (up) and left the programme (down). Active total shown above each month.</p><div id="rc-j"></div><div class="legend"><span><i style="background:var(--mid)"></i>Completed a full deposit</span><span><i style="background:var(--red)"></i>Left the programme</span></div></div>
-  <div class="panel"><h3>Participant journey</h3><p class="sub">Since launch</p><div id="rc-f"></div></div>
-  <div class="panel"><h3>Why approved applicants did not join</h3><p class="sub">Exit survey, Jul to Aug 2026, 6 responses</p><div id="rc-e"></div></div>
- </div>
- ${recs(['Offer a phased deposit plan that runs longer than four months, settled by installation.','Run a planned intake to fill the open places, timed to when applicants decide.','Track instalment payers monthly and support them to completion.'])}`;
- (()=>{const w=760,hh=200,s=el('svg',{viewBox:`0 0 ${w} ${hh}`},$('rc-j')),bw=w/9,mid=105,sc=26;
-  el('line',{x1:0,x2:w,y1:mid,y2:mid,stroke:'var(--line)'},s);
-  M.forEach((mm,k)=>{const x=k*bw+bw*.25,b2=bw*.5,o=m==null||k==m?1:.35;
-   tx(s,x+b2/2,16,D.act[k],{'text-anchor':'middle',class:'val'});
-   if(D.joined[k]){const r=el('rect',{x,y:mid-D.joined[k]*sc,width:b2,height:D.joined[k]*sc,rx:3,fill:'var(--mid)','fill-opacity':o,style:'cursor:pointer'},s);r.onclick=()=>setM(k);tipOn(r,MF[k]+': '+D.joined[k]+' completed a full deposit');tx(s,x+b2/2,mid-D.joined[k]*sc-5,'+'+D.joined[k],{'text-anchor':'middle'})}
-   if(D.left[k]){const r=el('rect',{x,y:mid,width:b2,height:D.left[k]*sc,rx:3,fill:'var(--red)','fill-opacity':o,style:'cursor:pointer'},s);r.onclick=()=>setM(k);tipOn(r,MF[k]+': '+D.left[k]+' left');tx(s,x+b2/2,mid+D.left[k]*sc+14,'-'+D.left[k],{'text-anchor':'middle'})}
-   tx(s,x+b2/2,hh-6,mm,{'text-anchor':'middle'})})})();
- hbars($('rc-f'),[['Paid a deposit',45,'var(--light)'],['Still in programme',36,'var(--mid)'],['Full deposit paid',32,'var(--mid)'],['Machine in place',24,'var(--deep)']],{fmt:v=>v,lw:120});
- hbars($('rc-e'),[['Lack of deposit funds',6,'var(--red)'],['Would join if terms change',2,'var(--amber)'],['Unclear communication',0,'var(--grey)']],{fmt:v=>v+' of 6',lw:165,max:6});};
+P.machines={months:true,r:m=>{const i=m??8;
+ return `<h1>Machines in place rose from 18 to 24 in 2026, and the waiting list fell from 13 to 7.</h1>
+ ${kpi('KPI-03','Machines installed and in place','50','24','risk')}${kpi('KPI-04','Participants waiting for a machine','Fewer','7','risk')}
+ <div class="split"><div class="stack">${stat(D.mac[i]+' of 50','Machines in place',`${MF[i]} 2026, up from 18 in January`)}${stat(D.wait[i],'Participants waiting for a machine','Down from 13 in January')}${stat('9 / 3','Installed / removed since January','Net gain of 6 machines')}</div>
+ <div><p class="ct">Machines in place rise as the waiting list falls</p><div id="c1"></div><div class="legend"><span><i style="background:var(--navy)"></i>Machines in place</span><span><i style="background:var(--green)"></i>Participants waiting for a machine</span></div></div></div>
+ <div class="split">${facts(['Placement came in bursts: three Sasko sites in March and three Eduvos campuses in May.','77% of participants with a full deposit now have a machine.','Student accommodation earns the most revenue, and three machines have moved to these sites.','Three new sites are being secured for waiting participants. The Future Life machine came out in September when its operator exited.'])}
+ ${table(['Month','In place','Waiting','Installed','Removed'],MF.map((x,k)=>[x,D.mac[k],D.wait[k],D.minst[k],D.mrem[k]]),{selIdx:m,clickIdx:k=>k})}</div>
+ ${recs(['Finalise the three allocated sites and redeploy the idle Future Life machine.','Prioritise student accommodation and factory sites for every new placement.','Let operators scout their own sites, with fast-tracked approval.','Place any idle machine within 30 days of a site closing.'])}`},
+ draw:m=>lines($('c1'),[[D.mac,'var(--navy)',false,'machines in place'],[D.wait,'var(--green)',true,'waiting']],{m})};
 
-P.machines=m=>{const i=m??8;const h=$('p-machines');
- h.innerHTML=`<h2 class="head">Machines in place rose from 18 to 24 in 2026 and the waiting list fell from 13 to 8.</h2>
- ${tag('KPI-03 / 04','Machines installed and participants waiting','50 machines, fewer waiting',`${MF[i]}: ${D.mac[i]} in place, ${D.wait[i]} waiting`,'a')}
- <div class="tiles">${tile('Machines in place',D.mac[i]+'<small> / 50</small>',`${pct(D.mac[i],50)}% of target`,'var(--amber)')}${tile('Waiting for a machine',D.wait[i],'Full deposit paid, not installed','var(--amber)')}${tile('Installation rate',pct(D.mac[i],D.mac[i]+D.wait[i])+'%','Installed / active','var(--mid)')}${tile('Sites at risk',5,'Service, power or relocation','var(--red)')}</div>
- <div class="grid">
-  <div class="panel wide"><h3>Machines in place against participants waiting</h3><p class="sub">Month end. Total active shown above each bar.</p><div id="mc-s"></div><div class="legend"><span><i style="background:var(--deep)"></i>Machine in place</span><span><i style="background:var(--steel)"></i>Waiting for a machine</span></div></div>
-  <div class="panel"><h3>Installation rate</h3><p class="sub">Share of active participants with a machine</p><div id="mc-r"></div></div>
-  <div class="panel"><h3>Pipeline, September</h3><p class="sub">What is moving</p><div class="facts"><div><b>3</b> sites allocated to waiting participants</div><div><b>3</b> machines moved to student accommodation</div><div><b>1</b> new install: The Maslow Sandton, 19 Aug</div><div><b>5</b> sites need service, power or relocation support</div></div></div>
- </div>
- ${recs(['Confirm installation dates for the three allocated sites.','Prioritise student accommodation and factory sites for the remaining waiting list.','Agree a protocol for inactive machines, with a 30 day trigger for support.'])}`;
- stack($('mc-s'),D.mac,D.wait,{m,la:'in place',lb:'waiting'});
- line($('mc-r'),D.mac.map((v,k)=>Math.round(v/(v+D.wait[k])*1000)/10),{m,w:380,h:200,mn:50,mx:100});};
+P.revenue={months:true,r:m=>{const i=m??8,ytd=D.sales.slice(0,i+1).reduce((a,b)=>a+b,0);
+ return `<h1>Revenue to date passes R1.5 million. Every machine in place is trading.</h1>
+ <div class="split"><div class="stack">${stat(Rk(D.cum[i]),'Revenue to date',`Verified machine sales, January 2025 to ${MF[i]} 2026`)}${stat(Rk(ytd),'Revenue in 2026',`January to ${MF[i]} 2026. 2025 full year: R372,808`)}${stat('R171,912','Best month','May 2026')}</div>
+ <div><p class="ct">Monthly revenue, 2026</p><div id="c1"></div><p class="note">NAYAX verified. Hatfield Studios added from June. September runs to 28 September.</p></div></div>
+ <div class="split">${facts(['Revenue climbed from R53k in January to above R165k a month from March to May.','July dipped when student sites emptied over the winter break.','Student accommodation sites earn 60% of revenue.','The top three machines earn 55% of revenue.'])}
+ ${table(['Site type','Share of revenue'],[['Student accommodation','60%'],['Factory or industrial','16%'],['Corporate office','11%'],['Tertiary campus','9%'],['Hospitality','4%']])}</div>
+ ${recs(['Move low earning machines toward student accommodation and factory sites.','Lift the middle of the cohort so revenue relies less on the top three machines.','Resolve the PEPSICO stock discount so it reaches operators.'])}`},
+ draw:m=>vbars($('c1'),M,D.sales,{m,fmt:Rk,tipf:k=>MF[k]+': '+RF(D.sales[k])})};
 
-P.revenue=m=>{const i=m??8;const h=$('p-revenue');const ytd=D.sales.slice(0,i+1).reduce((a,b)=>a+b,0);
- h.innerHTML=`<h2 class="head">Sales passed R1.5 million since January 2025. Student accommodation sites earn the most.</h2>
- <div class="tiles">${tile('Sales in '+MF[i],R(D.sales[i]),'NAYAX verified','var(--mid)')}${tile('2026 to date',R(ytd),'Jan to '+M[i],'var(--deep)')}${tile('Since Jan 2025',R(D.cum[i]),'2025 total R373k','var(--deep)')}${tile('Per machine',R(D.pm[i]),'Sales / machines in place','var(--mid)')}</div>
- <div class="grid">
-  <div class="panel wide"><h3>Monthly sales, 2026</h3><p class="sub">Rand. July dip: student sites quiet over the winter break.</p><div id="rv-s"></div></div>
-  <div class="panel"><h3>Sales per machine</h3><p class="sub">Monthly, rand</p><div id="rv-p"></div></div>
-  <div class="panel"><h3>Share of sales by site type</h3><p class="sub">25 Aug to 26 Sep</p><div id="rv-t"></div></div>
-  <div class="panel"><h3>Top machines</h3><p class="sub">25 Aug to 26 Sep. Top 3 earn 55% of sales.</p><div id="rv-m"></div></div>
-  <div class="panel"><h3>Sales by province</h3><p class="sub">25 Aug to 26 Sep</p><div id="rv-pr"></div></div>
- </div>
- ${recs(['Move low earning machines toward student accommodation and factory sites.','Reduce reliance on the top three machines by lifting the middle of the cohort.','Resolve the PEPSICO stock discount so it reaches operators.'])}`;
- bars($('rv-s'),D.sales,{m:i,tipf:(l,v)=>l+': '+RF(v)});
- bars($('rv-p'),D.pm,{m:i,w:380,h:200,fmt:v=>'R'+(v/1000).toFixed(1)+'k',tipf:(l,v)=>l+': '+RF(v)});
- hbars($('rv-t'),[['Student accommodation',60,'var(--deep)'],['Factory / industrial',16,'var(--mid)'],['Corporate office',11,'var(--mid)'],['Tertiary campus',9,'var(--light)'],['Hospitality',4,'var(--light)']]);
- hbars($('rv-m'),[['Hatfield Studios',38285,'var(--deep)'],['Arteria Parktown',32721,'var(--deep)'],['Peak Studios',11420,'var(--mid)'],['Sasko Epping',10727,'var(--mid)'],['Gibela Corporate',7285,'var(--light)'],['Respublica Hatfield Sq',5865,'var(--light)']],{fmt:R});
- hbars($('rv-pr'),[['Gauteng',77.7,'var(--deep)'],['Western Cape',19.6,'var(--mid)'],['KwaZulu-Natal',2.7,'var(--light)']],{lw:110});};
+P.profit={months:[5,6,7,8],r:m=>{const i=m!=null&&D.prof[m]?m:null;
+ const rows=[5,6,7,8].map(k=>{const p=D.prof[k];return[MF[k],p[0]+' of '+p[3],p[1]+' ('+Math.round(p[1]/p[0]*100)+'%)',p[2]]});
+ return `<h1>Across June to September, just over half of responding operators reported a profit.</h1>
+ ${kpi('KPI-08','Operators reporting a profit','100%','50% (8 of 16)','off')}
+ <div class="split"><div class="stack">${stat(i!=null?D.prof[i][1]+' of '+D.prof[i][0]:'30 of 56','Responses reporting a profit',i!=null?MF[i]+' 2026':'54% across the four months')}${stat('R235','Typical profit/loss result','Median of all 56 responses')}${stat('67%','Survey response rate, September','16 of 24 machines in place responded')}</div>
+ <div><p class="ct">Share of responding operators in profit</p><div id="c1"></div></div></div>
+ <div class="split">${facts(['Profitability follows revenue: lowest in July, when student sites emptied over the winter break, and back above half by September.','Responses fell to 6 in August and recovered to 16 in September, so August is the least reliable month.','Profit is concentrated: in September two operators account for 61% of all reported profit.','The highest monthly profit reported is R8,000, at Arteria Parktown, in June, July and September.'])}
+ ${table(['Month','Responded','In profit','Typical profit/loss'],rows,{selIdx:i!=null?i-5:null,clickIdx:k=>k+5})}</div>
+ ${recs(['Place new and relocated machines at student accommodation and factory sites, where operators are most often profitable.','Help operators build cash buffers before university breaks, when student sites go quiet.','Keep monthly survey response above 60% with personal follow-up, so results can be trusted.','Resolve the PEPSICO stock discount: margin, not demand, limits most operators.'])}
+ <p class="foot">About this data: self-reported in the monthly operator survey, which started in June 2026. Typical result is the median.</p>`},
+ draw:m=>{const ks=[5,6,7,8];vbars($('c1'),['June','July','August','September'],ks.map(k=>Math.round(D.prof[k][1]/D.prof[k][0]*100)),{m,idx:j=>ks[j],max:100,fmt:v=>v+'%',sub:ks.map(k=>D.prof[k][1]+' of '+D.prof[k][0]),tipf:j=>MF[ks[j]]+': '+D.prof[ks[j]][1]+' of '+D.prof[ks[j]][0]+' in profit'})}};
 
-P.profit=m=>{const i=m??8;const h=$('p-profit');const pf=D.prof[i];const val=pf?pct(pf[0],pf[1])+'%':'n/a';
- h.innerHTML=`<h2 class="head">Since June, about half of responding operators report a profit each month. Rental takes 30% of a typical machine's sales.</h2>
- ${tag('KPI-08','Operators reporting a profit','100%',`${MF[i]}: ${pf?pf[0]+' of '+pf[1]:'no survey'}`,'r')}
- <div class="tiles">${tile('In profit, '+MF[i],val,pf?pf[0]+' of '+pf[1]+' respondents':'Survey started in June','var(--red)')}${tile('Respondents in profit','30 of 55','Jun to Sep combined','var(--amber)')}${tile('Monthly rental','R877','Per operator','var(--mid)')}${tile('Rental vs median sales','30%','25 Aug to 26 Sep','var(--red)')}</div>
- <div class="grid">
-  <div class="panel"><h3>Share of respondents in profit</h3><p class="sub">Monthly survey. Target 100%.</p><div id="pf-b"></div></div>
-  <div class="panel"><h3>Survey responses</h3><p class="sub">Operators who answered, by month</p><div id="pf-n"></div></div>
-  <div class="panel wide"><h3>What the numbers say</h3><div class="facts"><div>Profit follows sales: it dipped in July when student sites closed for the winter break.</div><div>Responses fell from 22 in June to 6 in August, so monthly shares move a lot.</div><div>Two operators account for 61% of reported profit.</div></div></div>
- </div>
- ${recs(['Make the monthly survey part of the rental check-in to lift responses.','Review rental terms for machines whose sales sit below R3,000 a month.','Pair low earning operators with the top earners for site and stock advice.'])}`;
- const pv=M.map((x,k)=>D.prof[k]?pct(D.prof[k][0],D.prof[k][1]):null);
- bars($('pf-b'),pv,{m:pf?i:8,w:380,h:210,max:100,fmt:v=>v+'%',tipf:(l,v,k)=>l+': '+v+'% ('+D.prof[k][0]+' of '+D.prof[k][1]+')'});
- bars($('pf-n'),M.map((x,k)=>D.prof[k]?D.prof[k][1]:null),{m:pf?i:8,w:380,h:210,fmt:v=>v,base:'var(--grey)',hi:'var(--steel)'});};
+P.training={months:true,r:m=>{const i=m??8;
+ return `<h1>Training coverage fell from 82% to 69% as untrained participants joined and trained ones left.</h1>
+ ${kpi('KPI-02','Participants who completed training','100%','68.6%','off')}${kpi('KPI-06','Participants who attended a full-day session','100%','68.6%','off')}
+ <div class="split"><div class="stack">${stat(D.cover[i]+'%','Training coverage',`${MF[i]} 2026: trained participants still active`,'red')}${stat(D.trained[i]+' of 27','Trained participants still active','Trained at baseline in January')}${stat(D.meet[i],'Partner alignment sessions','Cumulative, target 50')}</div>
+ <div><p class="ct">Share of active participants who are trained</p><div id="c1"></div><div class="legend"><span><i style="background:var(--red)"></i>Training coverage, %</span></div></div></div>
+ <div class="split">${facts(['No training has run since January, so every new participant is untrained.','Three trained participants have left: two in May and one in September.','Partner alignment sessions are ahead of target, with one held every month.','Onboarding sessions reached 5, against a target of 2.'])}
+ ${table(['Month','Coverage','Trained, active','Partner sessions','Onboarding'],MF.map((x,k)=>[x,D.cover[k]+'%',D.trained[k],D.meet[k],D.onb[k]]),{selIdx:m,clickIdx:k=>k})}</div>
+ ${recs(['Run a catch-up training cycle for everyone who joined after January.','Make the full-day session part of onboarding for every new entrant.'])}`},
+ draw:m=>lines($('c1'),[[D.cover,'var(--red)',false,'%']],{m,mx:100,ticks:[0,25,50,75,100]})};
 
-P.training=m=>{const i=m??8;const h=$('p-training');
- h.innerHTML=`<h2 class="head">Training coverage fell from 82% to 67% as untrained participants joined and trained ones left.</h2>
- ${tag('KPI-02 / 06','Completed training, attended full day session','100%',`${MF[i]}: ${D.cover[i]}%`,'r')}
- <div class="tiles">${tile('Training coverage',D.cover[i]+'%','Trained and still active','var(--red)')}${tile('Trained, still active',D.trained[i],'Of 27 trained','var(--amber)')}${tile('Partner sessions',D.meet[i],'Cumulative, target 55','var(--deep)')}${tile('Onboarding sessions',D.onb[i],'Cumulative, target 2','var(--deep)')}</div>
- <div class="grid">
-  <div class="panel wide"><h3>Training coverage</h3><p class="sub">Trained participants still active, as a share of all active</p><div id="tr-c"></div></div>
-  <div class="panel"><h3>Partner alignment sessions</h3><p class="sub">Cumulative. Target of 55 reached in January.</p><div id="tr-m"></div></div>
-  <div class="panel"><h3>Trained participants still active</h3><p class="sub">Of the 27 trained at baseline</p><div id="tr-t"></div></div>
- </div>
- ${recs(['Run a catch-up training cycle for participants who joined after the baseline.','Make the full day session part of onboarding for every new entrant.'])}`;
- line($('tr-c'),D.cover,{m,mn:50,mx:100,col:'var(--red)',target:100});
- bars($('tr-m'),D.meet,{m:i,w:380,h:200,fmt:v=>v,max:70});
- bars($('tr-t'),D.trained,{m:i,w:380,h:200,fmt:v=>v,max:30});};
+P.kpi={months:false,r:()=>{const K=[['KPI-01','Active participants with a full deposit','50','31','31','off','31 of 50 places filled; 4 more paying in instalments'],['KPI-02','Participants who completed training','100%','81.8%','68.6%','off','No training since January; 24 of 35 active participants trained'],['KPI-03','Machines installed and in place','50','18','24','risk','Up 6 since January; 77% of full-deposit participants have a machine'],['KPI-04','Participants waiting for a machine','Fewer','13','7','risk','Down 6 since January; 3 new sites being secured'],['KPI-05','Partner alignment sessions held','50','55','63','on','Target exceeded; one session each month'],['KPI-06','Participants who attended a full-day session','100%','81.8%','68.6%','off','Falls as untrained participants join'],['KPI-07','Onboarding sessions delivered','2','3','5','on','Target exceeded; August session for new participants'],['KPI-08','Operators reporting a profit','100%','n/a','50%','off','September: 8 of 16 survey responses'],['KPI-09','Participants rating training positively','90%','78.6%','Closed','closed','Measured once; no further training this cycle'],['KPI-10','Improvement in living standards','90%','Score 75.0','Final report','risk','Starting score recorded; measured again at the final report'],['KPI-11','Participants applying new skills','90%','85.7%','Final report','risk','Close to target at the start; measured again at the final report'],['KPI-12','Participants reporting community recognition','90%','100%','Not re-measured','risk','Baseline 100% (n=10); not re-measured since'],['KPI-13','Confidence in commercial skills','Improve','66.7% / 40%','52.9% / 35.3% / 52.9%','risk','Technical / negotiate a location / explain margins (n=17). Baseline combined negotiate and margins'],['KPI-14','Entrepreneurial identity and agency','Evidence','Growth themes','Scaling','on','An operator paid off her machine and bought a second']];
+ const c={on:0,risk:0,off:0,closed:0};K.forEach(k=>c[k[5]]++);
+ return `<h1>KPI dashboard: progress against the 14 programme KPIs at September 2026.</h1>
+ <div class="kpi" style="gap:6px 26px">${Object.entries(c).map(([k,n])=>`<span style="font-weight:700;color:${ST[k][1]}"><span class="dotc" style="background:${ST[k][1]}"></span>${n} ${ST[k][0]}</span>`).join('')}</div>
+ <div style="margin-top:16px">${table(['KPI','Measure','Target','January 2026','September 2026','Status','Comment'],K.map(k=>[`<b style="color:var(--navy);white-space:nowrap">${k[0]}</b>`,k[1],k[2],k[3],`<b style="color:var(--navy)">${k[4]}</b>`,`<span style="color:${ST[k[5]][1]};font-weight:700;white-space:nowrap"><span class="dotc" style="background:${ST[k[5]][1]}"></span>${ST[k[5]][0]}</span>`,k[6]]))}</div>
+ <p class="foot">KPI-08 has no January figure: profitability was measured on a different basis before June 2026. KPIs 10 to 13 were measured at the start of the programme and are measured again at the final report.</p>`}};
 
-P.kpi=()=>{const K=[['KPI-01','Active participants with a full deposit','50','31','32','r'],['KPI-02','Participants who completed training','100%','81.8%','66.7%','r'],['KPI-03','Machines installed and in place','50','18','24','a'],['KPI-04','Participants waiting for a machine','Fewer','13','8','a'],['KPI-05','Partner alignment sessions held','55','55','63','g'],['KPI-06','Attended a full day session','100%','81.8%','66.7%','r'],['KPI-07','Onboarding sessions delivered','2','3','5','g'],['KPI-08','Operators reporting a profit','100%','n/a','53%','r'],['KPI-09','Rating training positively','90%','78.6%','Closed','c'],['KPI-10','Improvement in living standards','90%','Score 75.0','Final report','a'],['KPI-11','Applying new skills','90%','85.7%','Final report','a'],['KPI-12','Community recognition','90%','100%','Final report','a'],['KPI-13','Confidence in commercial skills','Improve','66.7% / 40%','67 / 38 / 56%','a'],['KPI-14','Entrepreneurial identity and agency','Evidence','Growth themes','Scaling','g']];
- const h=$('p-kpi');h.innerHTML=`<h2 class="head">3 KPIs on track, 6 at risk, 4 off track and 1 closed at September 2026.</h2>
- <div class="panel"><div id="kp-b"></div></div>
- <div class="panel" style="margin-top:14px"><div class="tw"><table><thead><tr><th>KPI</th><th>Measure</th><th>Target</th><th>Jan 2026</th><th>Sep 2026</th><th>Status</th></tr></thead><tbody>${K.map(k=>`<tr><td><b>${k[0]}</b></td><td>${k[1]}</td><td>${k[2]}</td><td>${k[3]}</td><td><b>${k[4]}</b></td><td style="white-space:nowrap"><i class="dot" style="background:${C[k[5]]}"></i>${CL[k[5]]}</td></tr>`).join('')}</tbody></table></div><p class="sub" style="margin-top:10px">KPI-10 to 13 were measured at the start of the programme and are measured again at the final report.</p></div>`;
- const d=[['On track',3,'var(--deep)'],['At risk',6,'var(--amber)'],['Off track',4,'var(--red)'],['Closed',1,'var(--muted)']];
- const s=el('svg',{viewBox:'0 0 760 56'},$('kp-b'));let x=0;d.forEach(([l,n,c])=>{const w=760*n/14;el('rect',{x,y:0,width:w-3,height:32,rx:4,fill:c},s);tx(s,x+10,22,n,{style:'fill:#fff;font-weight:800;font-size:15px'});tx(s,x+2,50,l,{class:'val'});x+=w});};
+P.outcomes={months:false,r:()=>`<h1>Outcomes and matters for KDF. Participant outcomes at the start of the programme, against the 90% target.</h1>
+ <div class="split"><div><p class="ct" style="text-align:left">Starting scores, February 2026</p><div id="c1"></div></div>
+ <div class="stack"><div class="story"><h4>SUCCESS STORY</h4><div style="font-weight:700;color:var(--navy);font-size:15px;line-height:1.4">Tsholofetso Manana paid off her programme machine at Hatfield Studios, then bought a second machine independently.</div><div class="bs">Operator, Hatfield Studios, Pretoria. Top-earning site.</div></div>
+ <div style="border:1.5px solid var(--red);border-radius:6px;padding:14px 16px"><h4 style="font:800 10px var(--f);letter-spacing:.08em;margin:0 0 6px;color:var(--red)">MATTERS FOR KDF'S ATTENTION</h4>${facts(['The PEPSICO stock discount is not reaching operators.','A formal protocol for inactive machines is still needed.','Two operators account for 61% of reported profit.','Five sites need service, power or relocation support.'])}</div></div></div>
+ <div class="split">${stat('6 of 6','Applicants who declined a place cited the R12,000 deposit','None cited communication or understanding of the programme. Two would join if payment terms allowed.','red')}
+ ${table(['Outcome','Starting score','September 2026'],[['Applying new skills','85.7%','Final report'],['Community recognition','100%','Not re-measured'],['Living standards score','75.0','Final report'],['Confident handling a technical breakdown','66.7%','52.9%'],['Confident negotiating and managing margins','40%','35.3% / 52.9%']])}</div>`,
+ draw:()=>{const rows=[['Applying new skills',85.7],['Community recognition',100],['Living standards score',75],['Confident negotiating margins',40]];
+  const w=420,s=el('svg',{viewBox:`0 0 ${w} ${rows.length*46}`},$('c1'));
+  rows.forEach(([l,v],k)=>{const y=k*46,bw=(w-60)*v/100;tx(s,0,y+13,l,{style:'fill:var(--navy);font-weight:700;font-size:11px'});el('rect',{x:0,y:y+20,width:w-60,height:14,fill:'var(--grey)'},s);const r=el('rect',{x:0,y:y+20,width:bw,height:14,fill:'var(--navy)'},s);tipOn(r,l+': '+v+(k==2?'':'%'));
+   el('line',{x1:(w-60)*.9,x2:(w-60)*.9,y1:y+16,y2:y+38,stroke:'var(--green)','stroke-width':2},s);tx(s,w-52,y+32,v+(k==2?'':'%'),{class:'v'})});}};
 
-P.outcomes=()=>{const h=$('p-outcomes');h.innerHTML=`<h2 class="head">Starting scores were set in February. Change is measured at the final report.</h2>
- <div class="grid">
-  <div class="panel"><h3>Starting scores, February 2026</h3><p class="sub">Against a 90% target</p><div id="oc-b"></div></div>
-  <div class="story"><div class="l">Success story</div><p>Tsholofetso Manana paid off her programme machine at Hatfield Studios, then bought a second machine on her own.</p><div style="font-size:13px;color:#e4efe0">Hatfield Studios, Pretoria. Top earning site.</div></div>
-  <div class="panel wide"><h3>Matters for KDF's attention</h3><div class="facts"><div>The PEPSICO stock discount is not reaching operators.</div><div>A formal protocol for inactive machines is still needed.</div><div>Two operators account for 61% of reported profit.</div><div>Five sites need service, power or relocation support.</div><div>A R12,000 deposit is held for a removed operator, with no refund yet.</div></div></div>
- </div>`;
- hbars($('oc-b'),[['Applying new skills',85.7,'var(--deep)'],['Living standards score',75,'var(--mid)'],['Confident negotiating',40,'var(--amber)']],{lw:150,max:100});};
+P.overview={months:true,r:m=>{const i=m??8;
+ const cards=[['recruitment','Active participants',D.full[i]+' of 50','With a full deposit. '+D.inst[i]+' more paying in instalments','off'],['machines','Machines in place',D.mac[i]+' of 50',D.wait[i]+' participants waiting for a machine','risk'],['revenue','Revenue to date',Rk(D.cum[i]),'Verified sales since January 2025','on'],['profit','Operators in profit',D.prof[i]?D.prof[i][1]+' of '+D.prof[i][0]:'8 of 16',D.prof[i]?MF[i]+' survey':'September survey. Survey started in June','off'],['training','Training coverage',D.cover[i]+'%','Of active participants trained','off'],['kpi','KPI status','3 / 6 / 4','On track, at risk and off track of 14 KPIs','risk'],['outcomes','Success story','1','Operator paid off her machine and bought a second','on'],['recruitment','Withdrawals after a deposit','10 of 45','22% of everyone who has paid a deposit','off']];
+ return `<h1>Revenue to date passes R1.5 million. Every machine in place is trading.</h1>
+ <div class="cards">${cards.map(c=>`<button class="card" data-go="${c[0]}"><span class="cl">${c[1]}<span class="dotc" style="background:${ST[c[4]][1]};margin:0"></span></span><div class="cv">${c[2]}</div><div class="cs">${c[3]}</div><span class="go">Open →</span></button>`).join('')}</div>
+ <div class="split" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)"><div><p class="ct">Monthly revenue, 2026</p><div id="c1"></div></div><div><p class="ct">Active participants by month</p><div id="c2"></div><div class="legend"><span><i style="background:var(--navy)"></i>Machine in place</span><span><i style="background:var(--lblue)"></i>Waiting</span></div></div></div>
+ <div class="two"><div class="story"><h4>SUCCESS STORY</h4>Tsholofetso Manana has paid off her programme machine at Hatfield Studios and bought a second machine independently.</div><div class="dep"><h4>DEPLOYMENT PROGRESS</h4>A new machine went live at The Maslow Sandton in August. Three machines moved to student accommodation, and three new sites are being secured for participants waiting for machines.</div></div>`},
+ draw:m=>{vbars($('c1'),M,D.sales,{m,fmt:Rk,h:230,tipf:k=>MF[k]+': '+RF(D.sales[k])});
+  const w=320,h=230,B=22,T=16,s=el('svg',{viewBox:`0 0 ${w} ${h}`},$('c2')),bw=w/9,sc=(h-B-T)/40;
+  M.forEach((mm,k)=>{const x=k*bw+bw*.15,b=bw*.7;const a=el('rect',{x,y:h-B-D.mac[k]*sc,width:b,height:D.mac[k]*sc,fill:'var(--navy)','fill-opacity':op(k,m),style:'cursor:pointer'},s);const c=el('rect',{x,y:h-B-(D.mac[k]+D.wait[k])*sc,width:b,height:D.wait[k]*sc,fill:'var(--lblue)','fill-opacity':op(k,m),style:'cursor:pointer'},s);
+   a.onclick=c.onclick=()=>setM(k);tipOn(a,MF[k]+': '+D.mac[k]+' in place');tipOn(c,MF[k]+': '+D.wait[k]+' waiting');tx(s,x+b/2,h-B-(D.mac[k]+D.wait[k])*sc-5,D.mac[k]+D.wait[k],{'text-anchor':'middle',class:'v','font-size':9.5});tx(s,x+b/2,h-6,mm,{'text-anchor':'middle','font-size':9.5})})}};
 
 /* navigation and month state */
 const AREAS=[['overview','Overview'],['recruitment','Recruitment'],['machines','Machine placement'],['revenue','Revenue'],['profit','Profitability'],['training','Training'],['kpi','KPI scorecard'],['outcomes','Outcomes']];
-const MONTHLY=['overview','recruitment','machines','revenue','profit','training'];
 let page='overview',mon=null;
 AREAS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.dataset.k=k;b.onclick=()=>go(k);$('nav').appendChild(b)});
-[['All months',null],...M.map((x,i)=>[x,i])].forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.dataset.i=i??'';b.onclick=()=>setM(i);$('months').appendChild(b)});
-function render(){AREAS.forEach(([k])=>$('p-'+k).hidden=k!==page);
- document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.k===page));
- document.querySelectorAll('#months button').forEach(b=>b.classList.toggle('on',String(mon??'')===b.dataset.i));
- $('months').classList.toggle('off',!MONTHLY.includes(page));
- $('p-'+page).innerHTML='';P[page](mon);}
+function months(){const box=$('months'),cfg=P[page].months;box.querySelectorAll('button').forEach(b=>b.remove());
+ const list=Array.isArray(cfg)?cfg:M.map((x,i)=>i);
+ [['All months',null],...list.map(i=>[M[i],i])].forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.className=(mon??null)===i?'on':'';b.onclick=()=>setM(i);box.appendChild(b)});
+ box.classList.toggle('off',!cfg);}
+function render(){const p=P[page];if(Array.isArray(p.months)&&mon!=null&&!p.months.includes(mon))mon=null;
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.k===page));
+ months();$('page').innerHTML=p.r(mon);p.draw&&p.draw(mon);wireRows();
+ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));}
 function go(k){page=k;try{history.replaceState(null,'','#'+k)}catch(e){}render();try{scrollTo({top:0,behavior:'smooth'})}catch(e){}}
 function setM(i){mon=i;render()}
-const h0=location.hash.slice(1);if(AREAS.some(a=>a[0]===h0))page=h0;
+const h0=location.hash.slice(1);if(P[h0])page=h0;
 render();
 </script>
 
